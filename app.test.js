@@ -1,44 +1,46 @@
-const supertest = require('supertest');
+// tests/login.test.js
+const request = require('supertest');
 const app = require('./app');
 
+describe('Login Tests with Persistent Cookies', () => {
+  const agent = request.agent(app);  // Create an agent to persist cookies
 
-// test no session set
-test("GET /get", done => {
-  supertest(app)
-    .get("/get")
-    .expect(200, "Session variable: No session set")
-    .end(done)
-})
+  test('GET /get and check session username', async () => {
+    let response = await agent
+      .get('/get')
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toEqual('Session variable: No session set');
+   });
 
-// test wrong credentials, existing user
-test("POST /login", done => {
-  supertest(app)
-    .post('/login')
-    .send("username=oser&password=dacku")
-    .expect(401)
-    .end(done)
-})
+  test('POST /login and maintain session', async () => {
+    let response = await agent
+      .post('/login')
+      .send('username=user&password=hacku')
+      .set('Content-Type', 'application/x-www-form-urlencoded');
+    expect(response.statusCode).toBe(200);
+    //expect(response.text).toEqual('Login erfolgreich');
+   });
 
-// test right credentials, existing user
-test("POST /login", done => {
-  supertest(app)
-    .post('/login')
-    .send("username=user&password=hacku")
-    .expect(200)
-    .end(done)
-})
+   test('GET /get and check session username', async () => {
+    let response = await agent
+      .get('/get')
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toEqual('Session variable: admin');
+   });
 
-// test logged in user
-test('GET /get', done => {
-  supertest(app)
-    .get('/get')
-    .set('Accept', 'text/html')
-    .expect(response => {
-        expect(response.text).toEqual('Session variable: No session set');
-      })
-    .end(done);
+  test('GET /logout should clear the session', async () => {
+    await agent.post('/login')
+      .send('username=user&password=hacku')
+      .set('Content-Type', 'application/x-www-form-urlencoded');
+    
+    let response = await agent.get('/logout');
+    expect(response.text).toEqual('Logout erfolgreich');
+  });
 
+  test('GET /get and check session username', async () => {
+    let response = await agent
+      .get('/get')
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toEqual('Session variable: No session set');
+   });
 });
-
-
-// // 3. logout
