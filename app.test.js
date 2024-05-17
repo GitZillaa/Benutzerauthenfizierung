@@ -25,7 +25,7 @@ describe('Login Tests with Persistent Cookies', () => {
     let response = await agent
       .get('/get')
     expect(response.statusCode).toBe(200);
-    expect(response.text).toEqual('Session variable: admin');
+    expect(response.text).toEqual('Session variable: user');
    });
 
   test('GET /logout should clear the session', async () => {
@@ -34,7 +34,7 @@ describe('Login Tests with Persistent Cookies', () => {
       .set('Content-Type', 'application/x-www-form-urlencoded');
     
     let response = await agent.get('/logout');
-    expect(response.text).toEqual('Logout erfolgreich');
+    expect(response.text).toEqual('logout erfolgreich');
   });
 
   test('GET /get and check session username', async () => {
